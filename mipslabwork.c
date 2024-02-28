@@ -13,6 +13,8 @@
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include "pic32mx.h"  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
+#include <stdio.h>
+
 
 int mytime = 0x5957;
 
@@ -24,9 +26,9 @@ volatile int *triseD;
 volatile int *trisE = (volatile int*) 0xbf886100;
  volatile int *portE = (volatile int*) 0xbf886110;
 
- int timeoutcount = 0; 
+int timeoutcount = 0; 
 int count=0;
-int rakna = 96;
+int score;
 
 /* Interrupt Service Routine */
 void user_isr( void )
@@ -43,8 +45,13 @@ void user_isr( void )
     IFSCLR(0) = 0x100; 
  }
    if (IFS(0) & 0x8000) { 
-      count=count+5;
-      *portE=(*portE & 0xffffff00) |count;
+      /*count=count+5;
+      *portE=(*portE & 0xffffff00) |count;*/
+      display_update();
+     clearScreenMemory();
+      drawBox(10, 0, 8, 8);
+      merge(nybild,icon,triangle);
+      display_image(1,nybild);
       IFSCLR(0) = 0x8000; 
    }
 }
@@ -89,28 +96,44 @@ void labwork( void )
       delay(35);
       clearScreenMemory();
       drawBox(10, 20, 8, 8);
+      display_update();
+      merge(nybild,icon,triangle);
       display_image(1,nybild);
 
   }
 
   if(button & 2){
 
-  }
+}
+  
 
    if (timeoutcount==1){ //every 10th interrupt , om 10 times per econ sätt timecount ==1
       display_update();
       clearScreenMemory();
       shiftTriangle(triangle);
+      shiftTriangle(triangle1);
+
       drawBox(10, 25, 8, 8);
       merge(nybild, icon, triangle);
       display_image(1,nybild);
      timeoutcount =0; //reset
+     
   }
   
   if (timeoutcount==1){
     score++;
   }
 
+ if (isGameOver(nybild)) 
+    {
+        //clearScreenMemory();
+      T2CONCLR = 0x8000;
+       display_update();
+       display_string(0, "GAME OVER");
+       display_string(2, "SCORE:");
+       display_score(3, 42);
+        
+    }
 
 
 }

@@ -10,6 +10,8 @@
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
+#include <stdio.h>
+
 
 int main(void) {
         /*
@@ -57,9 +59,10 @@ int main(void) {
 	display_init();
 
 	display_update();
-	CountDown();
+	//CountDown();
 	clearScreenMemory();
 	drawBox(10, 20, 8, 8);
+	display_update();
 	merge(nybild, icon, triangle);
 	display_image(1,nybild);
 	

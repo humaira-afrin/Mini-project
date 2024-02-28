@@ -7,6 +7,8 @@
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
+#include <stdio.h>
+
 
 /* Declare a helper function which is local to this file */
 static void num32asc( char * s, int ); 
@@ -348,11 +350,6 @@ char * itoaconv( int num )
   return( &itoa_buffer[ i + 1 ] );
 }
 /*****************************************************/
-
-
-
-
-
 void markTaco (int x, int y){			 //taken from github													
 
 if(x<129 && y<64){
@@ -447,22 +444,6 @@ void CountDown (void) {
 	        display_update();
 
 }
-
-
-
-void merge(uint8_t *nybild,  uint8_t *icon,  uint8_t *triangle) {
-    int i; 
-    for (i = 0; i < 128 * 4; ++i) {
-        nybild[i] = icon[i] & triangle[i];   
-    }
-        if (isGameOver(triangle, icon)) {
-        clearScreenMemory();
-        display_string(1, "     Game over");
-        display_update();
-    }
-}
-
-
   void shiftTriangle(uint8_t *triangle) {
   int numRows=32;
   int numCols=128;
@@ -478,21 +459,79 @@ void merge(uint8_t *nybild,  uint8_t *icon,  uint8_t *triangle) {
   
 }
 
-int isGameOver(uint8_t *triangle[], uint8_t *icon[]) {
-  int i;
-    for ( i = 0; i < 128*4; ++i) {
-        if ((triangle[i]||icon[i])==0) {
+int isGameOver(uint8_t nybild[]) {
+    int i;
+    int j;
+    for (i = 0; i < 32; ++i) {
+      for (j=0; j<128; ++j){
+        if ((nybild[i] | nybild[i+1]) || (nybild[j] | nybild[j+1]) == 0) {
             return 1; // Game over condition is met
         }
+      }
     }
     return 0; // Game not over
 }
 
-  /*if (isGameOver(triangle,icon)==1){
-  clearScreenMemory();
-  display_string(1,"     Game over");
-  display_update();
-}*/
+void merge(uint8_t *nybild,  uint8_t *icon,  uint8_t *triangle) {
+    int i; 
+    for (i = 0; i < 128 * 4; ++i) {
+        nybild[i] = icon[i] & triangle[i];   
+    } 
+
+}
+
+static void num32dec(char *s, int n) {
+    int i;
+    int divisor = 1000000000;  // Adjust divisor based on the maximum expected number
+    int leadingZeros = 1;  // Flag to indicate leading zeros
+
+    for (i = 0; i < 10; i++) {
+        int digit = (n / divisor) % 10;
+
+        // Skip leading zeros
+        if (digit != 0 || !leadingZeros) {
+            s[i] = '0' + digit;
+            leadingZeros = 0;  // Turn off leading zeros flag once a non-zero digit is encountered
+        } else {
+            s[i] = ' ';
+        }
+
+        divisor /= 10;
+    }
+
+    s[i] = '\0';  // Null-terminate the string
+}
+
+void display_score(int line, int n) {
+    int i;
+    char int_str[16];  // Assuming a maximum of 16 characters for the integer
+
+    if (line < 0 || line >= 4)
+        return;
+
+    // Convert the integer to a string using num32asc
+    num32dec(int_str, n);
+
+    // Copy the string representation of the integer to the text buffer
+    for (i = 0; i < 16 && int_str[i] != '\0'; i++) {
+        textbuffer[line][i] = int_str[i];
+    }
+
+    // Fill the remaining characters with spaces
+    for (; i < 16; i++) {
+        textbuffer[line][i] = ' ';
+    }
+}
+
+
+
+
+
+
+
+
+
+
  
 
 

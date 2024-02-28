@@ -38,10 +38,13 @@ void display_debug( volatile int * const addr );
 /* Declare bitmap array containing font */
 extern const uint8_t const font[128*8];
 /* Declare bitmap array containing icon */
- uint8_t icon[128*4];
+ uint8_t iconupp[128*4];
+uint8_t icon[128*4];
+
 //extern const uint8_t const icon2[128];
   uint8_t triangle[128*4];
   uint8_t nybild[128*4];
+  uint8_t triangle1[128*4];
 extern const uint8_t const obs1[128];
 extern const uint8_t const box[4*8];
 
@@ -57,7 +60,7 @@ int extern Tube1X;
 int extern Tube1Y;
 
 
-extern score;
+//extern score;
 
 
 
