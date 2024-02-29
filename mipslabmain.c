@@ -57,14 +57,15 @@ int main(void) {
 	SPI2CONSET = 0x8000;
 	
 	display_init();
+	start();
+
 
 	display_update();
-	//CountDown();
-	clearScreenMemory();
-	drawBox(10, 20, 8, 8);
+	//clearScreenMemory();
+	/*drawBox(10, 20, 8, 8);
 	display_update();
 	merge(nybild, icon, triangle);
-	display_image(1,nybild);
+	display_image(1,nybild);*/
 	
 
 	labinit(); /* Do any lab-specific initialization */
@@ -74,7 +75,4 @@ int main(void) {
 	  labwork(); /* Do lab-specific things again and again */
 	}
 	return 0;
-
-
-
 }

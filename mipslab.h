@@ -49,8 +49,10 @@ extern const uint8_t const obs1[128];
 extern const uint8_t const box[4*8];
 
 
-extern gameState;
+int gameState;
 extern countStart;
+int score;
+int highScore;
 
 
 int extern TacoX;       //Tacon som flyger

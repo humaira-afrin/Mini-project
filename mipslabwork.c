@@ -28,7 +28,7 @@ volatile int *trisE = (volatile int*) 0xbf886100;
 
 int timeoutcount = 0; 
 int count=0;
-int score;
+
 
 /* Interrupt Service Routine */
 void user_isr( void )
@@ -44,15 +44,15 @@ void user_isr( void )
     }
     IFSCLR(0) = 0x100; 
  }
+ //SW3
    if (IFS(0) & 0x8000) { 
-      /*count=count+5;
-      *portE=(*portE & 0xffffff00) |count;*/
-      display_update();
-     clearScreenMemory();
-      drawBox(10, 0, 8, 8);
-      merge(nybild,icon,triangle);
-      display_image(1,nybild);
+	   T2CONCLR = 0x8000;
       IFSCLR(0) = 0x8000; 
+   }
+   //SW1
+      if (IFS(0) & 0x80) { 
+	   T2CON = 0x8070; 
+      IFSCLR(0) =  0x80; 
    }
 }
 
@@ -61,10 +61,9 @@ void user_isr( void )
 void labinit( void )
 {
   *trisE = *trisE & 0x00;
-  //assignment 2a
   TMR2 = 0; 
-  PR2= ((80000000/256)/10); 
-  T2CON = 0x8070; 
+  PR2= ((80000000/256)/30); 
+  //T2CON = 0x8070; 
   IEC(0) = 1 << 8;
   IPCSET(2) = 0x1F;
 
@@ -74,6 +73,11 @@ void labinit( void )
   TRISDSET = 0x400; // Set bit 10 as input
   IECSET(0)=0x8000;
   IPC(3)=0x1F00; //bit 10-12 är priority
+
+  /*SWTICH 1*/
+  TRISDSET = 0x100; // Set bit  as input
+  IECSET(0)=0x80;
+  IPC(1)=0x1F000000;
 
   enable_interrupts(); 
   return;
@@ -93,19 +97,21 @@ void labwork( void )
       drawBox(10, 0, 8, 8);
       merge(nybild,icon,triangle);
       display_image(1,nybild);
-      delay(35);
-      clearScreenMemory();
+      delay(10);
+      /*clearScreenMemory();
       drawBox(10, 20, 8, 8);
       display_update();
       merge(nybild,icon,triangle);
-      display_image(1,nybild);
+      display_image(1,nybild);*/
 
   }
 
   if(button & 2){
-
-}
-  
+   clearScreenMemory();
+   CountDown();
+   T2CON = 0x8070; 
+   display_update();
+   }
 
    if (timeoutcount==1){ //every 10th interrupt , om 10 times per econ sätt timecount ==1
       display_update();
@@ -117,25 +123,32 @@ void labwork( void )
       merge(nybild, icon, triangle);
       display_image(1,nybild);
      timeoutcount =0; //reset
-     
   }
   
-  if (timeoutcount==1){
-    score++;
-  }
 
- if (isGameOver(nybild)) 
+   /*if (isGameOver(nybild)) 
     {
         //clearScreenMemory();
-      T2CONCLR = 0x8000;
+       T2CONCLR = 0x8000;
        display_update();
        display_string(0, "GAME OVER");
        display_string(2, "SCORE:");
        display_score(3, 42);
         
-    }
+    }*/
 
+  /*switch (gameState)
+   {
+   case 0:
+      break;
 
+   case 1:
+      T2CONCLR = 0x8000;
+      display_update();
+      display_string(0, "GAME OVER");
+      display_string(2, "SCORE:");
+      break;
+   }*/
 }
 
 

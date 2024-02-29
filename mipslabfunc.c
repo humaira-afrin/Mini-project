@@ -7,8 +7,6 @@
 #include <stdint.h>   /* Declarations of uint_32 and the like */
 #include <pic32mx.h>  /* Declarations of system-specific addresses etc */
 #include "mipslab.h"  /* Declatations for these labs */
-#include <stdio.h>
-
 
 /* Declare a helper function which is local to this file */
 static void num32asc( char * s, int ); 
@@ -24,10 +22,6 @@ static void num32asc( char * s, int );
 
 #define DISPLAY_TURN_OFF_VDD (PORTFSET = 0x40)
 #define DISPLAY_TURN_OFF_VBAT (PORTFSET = 0x20)
-
-
-
-
 
 /* quicksleep:
    A simple function to create a small delay.
@@ -165,7 +159,6 @@ void display_image(int x, const uint8_t *data) {
 			spi_send_recv(~data[i*128 + j]);
 	}
 }
-
 
 void display_box(int yOffset, const uint8_t *data) {
     int i, j;
@@ -350,60 +343,30 @@ char * itoaconv( int num )
   return( &itoa_buffer[ i + 1 ] );
 }
 /*****************************************************/
-void markTaco (int x, int y){			 //taken from github													
+void markBox(int x, int y) {
+    if (x < 128 && y < 32) {
+        int index = x + (y / 8) * 128;
+        int bit = 1 << (y % 8);
 
-if(x<129 && y<64){
-
-	if(y>= 8 && y<16){
-		y=y-8;
-		x = x +128;
-	}
-
-	if(y>= 16 && y<24){
-		y=y-16;
-		x = x +256;
-
-	}
-
-	if(y>= 24 && y<32){
-		y=y-24;
-		x = x +384;
-	}
-
-	if(y==0){
-		int write = ~1;
-		if ((~(icon[x] | write)) != 0){
-			gameState = 1;
-		}
-		icon[x] = icon[x] & write;
-		}
-
-		else {
-
-			int k = 1;
-			int l;
-
-			for(l=1; l<8; l++){
-				k *= 2;
-				if(y==l){
-						int write = ~k;
-							if ((~(icon[x] | write)) != 0){
-							gameState = 1;
-							}
-						icon[x] = icon[x] & write;
-				}
-			}
-		}
-	}
+        if (y == 0) {
+            if (icon[index] & bit) {
+                gameState = 1;// Collision detected
+            }
+            icon[index] &= ~bit;
+        } else {
+            if (icon[index] & bit) {
+                gameState = 1; // Collision 
+            }
+            icon[index] &= ~bit;
+        }
+    }
 }
-
-
 void drawBox(int startX, int startY, int width, int height) {
     int i, j;
 
     for (i = 0; i < height; i++) {
         for (j = 0; j < width; j++) {
-            markTaco(startX + j, startY + i);
+            markBox(startX + j, startY + i);
         }
     }
 }
@@ -415,36 +378,27 @@ void clearScreenMemory (void){
 	}
 }
 
-void CountDown (void) {
+void CountDown (void) 
+{
          display_string(2, "GEOMETRIC DASH");
 	        display_update();
 	        delay( 1000 );
-
 	        display_string(2, "      3");
 	        display_update();
 	        delay( 1000 );
-
 	        display_string(2, "      2");
 	        display_update();
 	        delay( 1000 );
-
 	        display_string(2, "      1");
 	        display_update();
 	        delay( 1000);
-
 	        display_string(2, "   LEVEL 1");
 	        display_update();
 	        delay( 1000 );
 	       display_update();
-
-
-					//gameState = 0;
-          display_string(2, "                     ");
-          delay( 1000 );
-	        display_update();
-
 }
-  void shiftTriangle(uint8_t *triangle) {
+  void shiftTriangle(uint8_t *triangle) 
+  {
   int numRows=32;
   int numCols=128;
   int i,j;
@@ -453,13 +407,11 @@ void CountDown (void) {
         for (j = 0; j < numCols - 1; ++j) {
             triangle[i * numCols + j] = triangle[i * numCols + j + 1];
         }
-        // Set the last element in the row to the saved value
-        triangle[i * numCols + numCols - 1] = temp;
+        triangle[i * numCols + numCols - 1] = temp; //last elemt --> first element
     }
-  
 }
 
-int isGameOver(uint8_t nybild[]) {
+/*int isGameOver(uint8_t nybild[]) {
     int i;
     int j;
     for (i = 0; i < 32; ++i) {
@@ -470,61 +422,39 @@ int isGameOver(uint8_t nybild[]) {
       }
     }
     return 0; // Game not over
-}
-
+}*/
 void merge(uint8_t *nybild,  uint8_t *icon,  uint8_t *triangle) {
     int i; 
     for (i = 0; i < 128 * 4; ++i) {
-        nybild[i] = icon[i] & triangle[i];   
+        nybild[i] = icon[i] & triangle[i];  
+        if ((icon[i] && triangle[i]) == 0) {
+          gameState=1;
+        } 
     } 
-
-}
-
-static void num32dec(char *s, int n) {
-    int i;
-    int divisor = 1000000000;  // Adjust divisor based on the maximum expected number
-    int leadingZeros = 1;  // Flag to indicate leading zeros
-
-    for (i = 0; i < 10; i++) {
-        int digit = (n / divisor) % 10;
-
-        // Skip leading zeros
-        if (digit != 0 || !leadingZeros) {
-            s[i] = '0' + digit;
-            leadingZeros = 0;  // Turn off leading zeros flag once a non-zero digit is encountered
-        } else {
-            s[i] = ' ';
-        }
-
-        divisor /= 10;
-    }
-
-    s[i] = '\0';  // Null-terminate the string
 }
 
 void display_score(int line, int n) {
     int i;
-    char int_str[16];  // Assuming a maximum of 16 characters for the integer
-
+    char int_str[16];  
     if (line < 0 || line >= 4)
         return;
-
-    // Convert the integer to a string using num32asc
-    num32dec(int_str, n);
-
-    // Copy the string representation of the integer to the text buffer
+    num32asc(int_str, n);
     for (i = 0; i < 16 && int_str[i] != '\0'; i++) {
         textbuffer[line][i] = int_str[i];
     }
-
-    // Fill the remaining characters with spaces
-    for (; i < 16; i++) {
+    for (; i < 16; i++) { //resten spaces
         textbuffer[line][i] = ' ';
     }
 }
-
-
-
+void highScoreCheck(){
+  if (score > highScore) {
+     highScore = score;
+  }
+}
+void start(){
+  display_string(1,"   START");
+  display_update();
+}
 
 
 
